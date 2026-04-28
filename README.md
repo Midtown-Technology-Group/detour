@@ -1,6 +1,12 @@
 # detour
 
-![CI](https://github.com/Midtown-Technology-Group/detour/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/Midtown-Technology-Group/detour/actions/workflows/ci.yml/badge.svg)](https://github.com/Midtown-Technology-Group/detour/actions/workflows/ci.yml)
+[![Release](https://github.com/Midtown-Technology-Group/detour/actions/workflows/release.yml/badge.svg)](https://github.com/Midtown-Technology-Group/detour/actions/workflows/release.yml)
+[![GitHub release](https://img.shields.io/github/v/release/Midtown-Technology-Group/detour)](https://github.com/Midtown-Technology-Group/detour/releases)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
+[![License: AGPL-3.0-only](https://img.shields.io/badge/license-AGPL--3.0--only-orange)](LICENSE)
+[![Coverage gate](https://img.shields.io/badge/coverage%20gate-%E2%89%A575%25-brightgreen)](pyproject.toml)
+[![OpenSSF checklist](https://img.shields.io/badge/OpenSSF-best%20practices%20checklist-informational)](https://www.bestpractices.dev/en/criteria/0)
 
 `detour` tracks the work you did to get back to the work you meant to do.
 
