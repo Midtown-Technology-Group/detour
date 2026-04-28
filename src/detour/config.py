@@ -20,6 +20,7 @@ class DetourConfig:
     notes_dir: Path
     section_heading: str
     time_format: str
+    agent_name: str
 
 
 def load_config() -> DetourConfig:
@@ -37,6 +38,7 @@ def load_config() -> DetourConfig:
     )
     section_heading = data.get("section_heading", "## Detours")
     time_format = data.get("time_format", "%H:%M")
+    agent_name = os.environ.get("DETOUR_AGENT") or data.get("agent_name", "default")
 
     return DetourConfig(
         config_dir=config_dir,
@@ -46,6 +48,7 @@ def load_config() -> DetourConfig:
         notes_dir=notes_dir,
         section_heading=section_heading,
         time_format=time_format,
+        agent_name=agent_name,
     )
 
 

@@ -129,3 +129,43 @@ def test_cli_event_command_accepts_structured_json(tmp_path: Path, monkeypatch) 
     assert result.exit_code == 0, result.output
     assert into.exit_code == 0, into.output
     assert json.loads(into.output)["current"] == "Refresh kubeconfig"
+
+
+def test_cli_agent_environment_scopes_active_stack(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("DETOUR_CONFIG_DIR", str(tmp_path / "config"))
+    monkeypatch.setenv("DETOUR_STATE_DIR", str(tmp_path / "state"))
+    monkeypatch.setenv("DETOUR_NOTES_DIR", str(tmp_path / "notes"))
+
+    monkeypatch.setenv("DETOUR_AGENT", "alpha")
+    alpha_start = runner.invoke(app, ["start", "Fix deploy", "--json"])
+
+    monkeypatch.setenv("DETOUR_AGENT", "beta")
+    beta_start = runner.invoke(app, ["start", "Write docs", "--json"])
+    beta_status = runner.invoke(app, ["status", "--json"])
+
+    monkeypatch.setenv("DETOUR_AGENT", "alpha")
+    alpha_status = runner.invoke(app, ["status", "--json"])
+    agents = runner.invoke(app, ["agents", "--json"])
+
+    assert alpha_start.exit_code == 0, alpha_start.output
+    assert beta_start.exit_code == 0, beta_start.output
+    assert json.loads(beta_status.output)["agent"] == "beta"
+    assert json.loads(beta_status.output)["current"] == "Write docs"
+    assert json.loads(alpha_status.output)["agent"] == "alpha"
+    assert json.loads(alpha_status.output)["current"] == "Fix deploy"
+    assert json.loads(agents.output)["agents"] == {
+        "alpha": {"stack_depth": 1, "current": "Fix deploy"},
+        "beta": {"stack_depth": 1, "current": "Write docs"},
+    }
+
+
+def test_cli_agent_option_overrides_environment(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("DETOUR_CONFIG_DIR", str(tmp_path / "config"))
+    monkeypatch.setenv("DETOUR_STATE_DIR", str(tmp_path / "state"))
+    monkeypatch.setenv("DETOUR_NOTES_DIR", str(tmp_path / "notes"))
+    monkeypatch.setenv("DETOUR_AGENT", "env-agent")
+
+    result = runner.invoke(app, ["--agent", "flag-agent", "start", "Fix deploy", "--json"])
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.output)["agent"] == "flag-agent"

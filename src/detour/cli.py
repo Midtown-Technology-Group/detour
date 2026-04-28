@@ -11,7 +11,7 @@ import typer
 from rich.console import Console
 from rich.tree import Tree
 
-from .config import load_config
+from .config import DetourConfig, load_config
 from .notes import append_event
 from .state import DetourState, StateError
 
@@ -19,15 +19,38 @@ app = typer.Typer(help="Track work detours in a small stack and daily Markdown n
 console = Console()
 
 
+@app.callback()
+def main(
+    ctx: typer.Context,
+    agent: str | None = typer.Option(
+        None,
+        "--agent",
+        help="Use a named agent stack. Defaults to DETOUR_AGENT or config.",
+    ),
+) -> None:
+    ctx.obj = {"agent": agent} if agent else {}
+
+
 @app.command()
 def start(
+    ctx: typer.Context,
     title: str,
     force: bool = typer.Option(False, "--force", help="Replace an active stack."),
     key: str | None = typer.Option(None, "--key", help="Idempotency key."),
     json_output: bool = typer.Option(False, "--json", help="Print structured JSON output."),
 ) -> None:
+    _start(ctx, title, force, key, json_output)
+
+
+def _start(
+    ctx: typer.Context,
+    title: str,
+    force: bool,
+    key: str | None,
+    json_output: bool,
+) -> None:
     cfg = load_config()
-    state = DetourState(cfg.state_file)
+    state = _state(cfg, ctx)
     try:
         result = state.start(title, force=force, key=key)
     except StateError as exc:
@@ -42,17 +65,29 @@ def start(
             "started",
             title,
         )
-    _print_result("start", state.load(), result.created, json_output, f"Started: {title}")
+    _print_result(
+        state.agent,
+        "start",
+        state.load(),
+        result.created,
+        json_output,
+        f"Started: {title}",
+    )
 
 
 @app.command("into")
 def into_detour(
+    ctx: typer.Context,
     title: str,
     key: str | None = typer.Option(None, "--key", help="Idempotency key."),
     json_output: bool = typer.Option(False, "--json", help="Print structured JSON output."),
 ) -> None:
+    _into(ctx, title, key, json_output)
+
+
+def _into(ctx: typer.Context, title: str, key: str | None, json_output: bool) -> None:
     cfg = load_config()
-    state = DetourState(cfg.state_file)
+    state = _state(cfg, ctx)
     try:
         result = state.push(title, key=key)
     except StateError as exc:
@@ -67,55 +102,53 @@ def into_detour(
             "detour",
             title,
         )
-    _print_result("into", state.load(), result.created, json_output, f"Detour: {title}")
+    _print_result(
+        state.agent,
+        "into",
+        state.load(),
+        result.created,
+        json_output,
+        f"Detour: {title}",
+    )
 
 
 @app.command()
 def done(
+    ctx: typer.Context,
     note: str | None = typer.Argument(None),
     json_output: bool = typer.Option(False, "--json", help="Print structured JSON output."),
 ) -> None:
-    _pop_with_event("done", note, json_output)
+    _pop_with_event(ctx, "done", note, json_output)
 
 
 @app.command()
 def back(
+    ctx: typer.Context,
     note: str | None = typer.Argument(None),
     json_output: bool = typer.Option(False, "--json", help="Print structured JSON output."),
 ) -> None:
-    _pop_with_event("back", note, json_output)
+    _pop_with_event(ctx, "back", note, json_output)
 
 
 @app.command()
 def log(
+    ctx: typer.Context,
     message: str,
     json_output: bool = typer.Option(False, "--json", help="Print structured JSON output."),
 ) -> None:
-    cfg = load_config()
-    state = DetourState(cfg.state_file)
-    stack = state.load()
-    if not stack:
-        _fail(StateError("No active detour."))
-    append_event(
-        cfg.notes_dir,
-        cfg.section_heading,
-        datetime.now(),
-        cfg.time_format,
-        len(stack) - 1,
-        "note",
-        message,
-    )
-    _print_result("log", stack, True, json_output, "Logged.")
+    _log(ctx, message, json_output)
 
 
 @app.command()
 def status(
+    ctx: typer.Context,
     json_output: bool = typer.Option(False, "--json", help="Print structured JSON output."),
 ) -> None:
     cfg = load_config()
-    stack = DetourState(cfg.state_file).load()
+    state = _state(cfg, ctx)
+    stack = state.load()
     if json_output:
-        _print_json(_stack_payload("status", stack, created=False))
+        _print_json(_stack_payload(state.agent, "status", stack, created=False))
         return
     if not stack:
         console.print("No active detour.")
@@ -129,16 +162,20 @@ def status(
 
 
 @app.command()
-def reset(yes: bool = typer.Option(False, "--yes", help="Clear the active stack.")) -> None:
+def reset(
+    ctx: typer.Context,
+    yes: bool = typer.Option(False, "--yes", help="Clear the active stack."),
+) -> None:
     if not yes:
         _fail(StateError("Pass --yes to reset the active stack."))
     cfg = load_config()
-    DetourState(cfg.state_file).reset()
+    _state(cfg, ctx).reset()
     console.print("Reset.")
 
 
 @app.command()
 def event(
+    ctx: typer.Context,
     payload: str,
     json_output: bool = typer.Option(False, "--json", help="Print structured JSON output."),
 ) -> None:
@@ -159,24 +196,24 @@ def event(
     if event_type == "start":
         if not isinstance(title, str):
             _fail(StateError("Event title must be a string."))
-        start(title, force=False, key=key, json_output=json_output)
+        _start(ctx, title, force=False, key=key, json_output=json_output)
     elif event_type == "into":
         if not isinstance(title, str):
             _fail(StateError("Event title must be a string."))
-        into_detour(title, key=key, json_output=json_output)
+        _into(ctx, title, key=key, json_output=json_output)
     elif event_type == "done":
         if note is not None and not isinstance(note, str):
             _fail(StateError("Event note must be a string."))
-        done(note, json_output=json_output)
+        _pop_with_event(ctx, "done", note, json_output)
     elif event_type == "back":
         if note is not None and not isinstance(note, str):
             _fail(StateError("Event note must be a string."))
-        back(note, json_output=json_output)
+        _pop_with_event(ctx, "back", note, json_output)
     elif event_type == "log":
         message = data.get("message")
         if not isinstance(message, str):
             _fail(StateError("Event message must be a string."))
-        log(message, json_output=json_output)
+        _log(ctx, message, json_output)
     else:
         _fail(StateError("Event type must be one of start, into, done, back, or log."))
 
@@ -191,11 +228,36 @@ def show_config() -> None:
     console.print(f"notes_dir: {cfg.notes_dir}")
     console.print(f"section_heading: {cfg.section_heading}")
     console.print(f"time_format: {cfg.time_format}")
+    console.print(f"agent_name: {cfg.agent_name}")
 
 
-def _pop_with_event(action: str, note: str | None, json_output: bool) -> None:
+@app.command()
+def agents(
+    ctx: typer.Context,
+    json_output: bool = typer.Option(False, "--json", help="Print structured JSON output."),
+) -> None:
     cfg = load_config()
-    state = DetourState(cfg.state_file)
+    state = _state(cfg, ctx)
+    payload = {
+        agent: {
+            "stack_depth": len(stack),
+            "current": stack[-1].title if stack else None,
+        }
+        for agent, stack in state.load_all().items()
+    }
+    if json_output:
+        _print_json({"status": "ok", "action": "agents", "agent": state.agent, "agents": payload})
+        return
+    if not payload:
+        console.print("No active agent stacks.")
+        return
+    for agent, summary in payload.items():
+        console.print(f"{agent}: {summary['current']} ({summary['stack_depth']})")
+
+
+def _pop_with_event(ctx: typer.Context, action: str, note: str | None, json_output: bool) -> None:
+    cfg = load_config()
+    state = _state(cfg, ctx)
     stack = state.load()
     if not stack:
         _fail(StateError("No active detour."))
@@ -215,6 +277,7 @@ def _pop_with_event(action: str, note: str | None, json_output: bool) -> None:
     )
     suffix = f": {note}" if note else ""
     _print_result(
+        state.agent,
         action,
         state.load(),
         True,
@@ -223,12 +286,43 @@ def _pop_with_event(action: str, note: str | None, json_output: bool) -> None:
     )
 
 
+def _log(ctx: typer.Context, message: str, json_output: bool) -> None:
+    cfg = load_config()
+    state = _state(cfg, ctx)
+    stack = state.load()
+    if not stack:
+        _fail(StateError("No active detour."))
+    append_event(
+        cfg.notes_dir,
+        cfg.section_heading,
+        datetime.now(),
+        cfg.time_format,
+        len(stack) - 1,
+        "note",
+        message,
+    )
+    _print_result(state.agent, "log", stack, True, json_output, "Logged.")
+
+
+def _state(cfg: DetourConfig, ctx: typer.Context) -> DetourState:
+    return DetourState(cfg.state_file, agent=_agent_name(cfg, ctx))
+
+
+def _agent_name(cfg: DetourConfig, ctx: typer.Context) -> str:
+    obj = ctx.obj if isinstance(ctx.obj, dict) else {}
+    value = obj.get("agent") or cfg.agent_name
+    if not isinstance(value, str):
+        raise StateError("Agent name must be a string.")
+    return value
+
+
 def _fail(exc: StateError) -> None:
     console.print(f"[red]{exc}[/red]")
     raise typer.Exit(1)
 
 
 def _print_result(
+    agent: str,
     action: str,
     stack: list[Any],
     created: bool,
@@ -236,15 +330,16 @@ def _print_result(
     human_message: str,
 ) -> None:
     if json_output:
-        _print_json(_stack_payload(action, stack, created))
+        _print_json(_stack_payload(agent, action, stack, created))
         return
     console.print(human_message)
 
 
-def _stack_payload(action: str, stack: list[Any], created: bool) -> dict[str, Any]:
+def _stack_payload(agent: str, action: str, stack: list[Any], created: bool) -> dict[str, Any]:
     return {
         "status": "ok",
         "action": action,
+        "agent": agent,
         "created": created,
         "stack_depth": len(stack),
         "current": stack[-1].title if stack else None,

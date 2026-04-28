@@ -15,21 +15,49 @@ class StateError(RuntimeError):
 
 
 class DetourState:
-    def __init__(self, path: Path) -> None:
+    def __init__(self, path: Path, agent: str = "default") -> None:
         self.path = path
+        self.agent = _normalize_agent(agent)
 
     def load(self) -> list[StackItem]:
+        return self.load_all().get(self.agent, [])
+
+    def load_all(self) -> dict[str, list[StackItem]]:
         if not self.path.exists():
-            return []
+            return {}
         try:
             data = json.loads(self.path.read_text(encoding="utf-8"))
         except json.JSONDecodeError as exc:
             raise StateError(f"State file is not valid JSON: {self.path}") from exc
-        return [StackItem.from_dict(item) for item in data.get("stack", [])]
+        if not isinstance(data, dict):
+            raise StateError(f"State file must contain a JSON object: {self.path}")
+        if "agents" in data:
+            agents = data["agents"]
+            if not isinstance(agents, dict):
+                raise StateError(f"State file agents field must be an object: {self.path}")
+            return {
+                _normalize_agent(name): _stack_from_payload(payload)
+                for name, payload in agents.items()
+            }
+        return {"default": _stack_from_payload(data)}
 
     def save(self, stack: list[StackItem]) -> None:
+        agents = self.load_all()
+        if stack:
+            agents[self.agent] = stack
+        else:
+            agents.pop(self.agent, None)
+        self.save_all(agents)
+
+    def save_all(self, agents: dict[str, list[StackItem]]) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        payload = {"stack": [item.to_dict() for item in stack]}
+        payload = {
+            "agents": {
+                _normalize_agent(agent): {"stack": [item.to_dict() for item in stack]}
+                for agent, stack in sorted(agents.items())
+                if stack
+            }
+        }
         tmp = self.path.with_suffix(self.path.suffix + ".tmp")
         tmp.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
         os.replace(tmp, self.path)
@@ -65,3 +93,19 @@ class DetourState:
 
     def reset(self) -> None:
         self.save([])
+
+
+def _stack_from_payload(payload: object) -> list[StackItem]:
+    if not isinstance(payload, dict):
+        raise StateError("State stack payload must be an object.")
+    stack = payload.get("stack", [])
+    if not isinstance(stack, list):
+        raise StateError("State stack field must be a list.")
+    return [StackItem.from_dict(item) for item in stack]
+
+
+def _normalize_agent(agent: object) -> str:
+    value = str(agent).strip()
+    if not value:
+        raise StateError("Agent name cannot be empty.")
+    return value

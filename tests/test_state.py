@@ -60,3 +60,28 @@ def test_pop_empty_stack_errors(tmp_path: Path) -> None:
 
     with pytest.raises(StateError, match="No active detour"):
         state.pop()
+
+
+def test_agent_stacks_are_isolated_in_same_state_file(tmp_path: Path) -> None:
+    state_path = tmp_path / "stack.json"
+    alpha = DetourState(state_path, agent="alpha")
+    beta = DetourState(state_path, agent="beta")
+
+    alpha.start("Fix deploy")
+    alpha.push("Refresh kubeconfig")
+    beta.start("Write docs")
+
+    assert [item.title for item in alpha.load()] == ["Fix deploy", "Refresh kubeconfig"]
+    assert [item.title for item in beta.load()] == ["Write docs"]
+    assert sorted(alpha.load_all()) == ["alpha", "beta"]
+
+
+def test_legacy_single_stack_state_loads_as_default_agent(tmp_path: Path) -> None:
+    state_path = tmp_path / "stack.json"
+    state_path.write_text('{"stack":[{"title":"Fix deploy"}]}\n', encoding="utf-8")
+
+    default = DetourState(state_path)
+    other = DetourState(state_path, agent="other")
+
+    assert [item.title for item in default.load()] == ["Fix deploy"]
+    assert other.load() == []

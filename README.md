@@ -41,6 +41,7 @@ Other useful commands:
 ```powershell
 detour status
 detour status --json
+detour agents
 detour log "Found the expired role assignment"
 detour back "Not needed after all"
 detour reset --yes
@@ -56,6 +57,22 @@ detour event '{"type":"into","title":"Debug SSO role","key":"debug-sso-role"}' -
 
 `--key` is an idempotency guard. If the current stack item already has the same
 key, `detour` returns success without pushing a duplicate item.
+
+## Multi-Agent State
+
+By default, commands use the `default` agent stack. Agents can avoid stepping on
+each other by setting `DETOUR_AGENT` or passing `--agent` before the command:
+
+```powershell
+$env:DETOUR_AGENT = "codex-detour-site"
+detour start "Fix project site"
+
+detour --agent "codex-ci-debug" start "Investigate failing CI"
+detour agents
+```
+
+All agent stacks share the same state file, but each agent has an independent
+active chain. Existing single-stack state files load as the `default` agent.
 
 ## Files
 
@@ -78,6 +95,7 @@ For tests or local overrides, these environment variables are supported:
 - `DETOUR_CONFIG_DIR`
 - `DETOUR_STATE_DIR`
 - `DETOUR_NOTES_DIR`
+- `DETOUR_AGENT`
 
 ## Markdown
 
