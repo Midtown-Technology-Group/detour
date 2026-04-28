@@ -7,7 +7,13 @@ name = "detour"
 version = "0.1.0"
 description = "Track the work you did to get back to the work you meant to do."
 readme = "README.md"
+license = "AGPL-3.0-only"
 requires-python = ">=3.11"
+classifiers = [
+  "License :: OSI Approved :: GNU Affero General Public License v3",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+]
 dependencies = [
   "platformdirs>=4.0",
   "rich>=13.0",

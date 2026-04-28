@@ -72,3 +72,7 @@ For tests or local overrides, these environment variables are supported:
   - 09:25 done
 - 09:42 done: Deploy fixed
 ```
+
+## License
+
+AGPL-3.0-only. See [LICENSE](LICENSE).
