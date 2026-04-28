@@ -406,6 +406,46 @@ pre {
   color: var(--black);
 }
 
+.maturity-band {
+  background:
+    linear-gradient(90deg, rgba(255, 122, 24, 0.95) 0 10px, transparent 10px),
+    linear-gradient(180deg, #151821, #0b0d12);
+}
+
+.maturity-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(320px, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.maturity-grid h2 {
+  margin-bottom: 0;
+}
+
+.maturity-grid ul {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.maturity-grid li {
+  border: 1px solid var(--edge);
+  background: rgba(7, 8, 10, 0.5);
+  color: var(--muted);
+  padding: 14px 16px;
+}
+
+.maturity-grid li::before {
+  margin-right: 10px;
+  color: var(--orange-2);
+  content: "roadworthy";
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.74rem;
+}
+
 .install .eyebrow {
   color: var(--black);
 }
@@ -436,6 +476,7 @@ pre {
   .side-rail,
   .feature-grid,
   .split,
+  .maturity-grid,
   .install-inner {
     grid-template-columns: 1fr;
   }

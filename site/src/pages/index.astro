@@ -4,6 +4,7 @@ import "../styles/site.css";
 const commands = [
   ['detour start "Fix deploy"', "root task"],
   ['detour into "Refresh kubeconfig"', "nested detour"],
+  ['detour pothole "SSO token expired"', "mark friction"],
   ['detour into "Debug SSO role"', "one more turn"],
   ['detour done "Role expired"', "pop back"],
 ];
@@ -14,23 +15,38 @@ const features = [
     body: "The active chain lives in JSON, so humans and agents can both ask where the work actually is.",
   },
   {
-    title: "Daily note append",
-    body: "Every start, detour, log, done, and back event lands cleanly under your Markdown Detours section.",
+    title: "LogSeq-safe notes",
+    body: "Write to plain Markdown or append under an existing LogSeq journal block with configurable date filenames.",
   },
   {
     title: "Block-like commands",
-    body: "Idempotent keys and structured events let automations trace messy work without parsing prose.",
+    body: "Idempotent keys, structured events, and potholes let automations trace messy work without parsing prose.",
   },
 ];
 
-const stackItems = ["Fix deploy", "Refresh kubeconfig", "Debug SSO role"];
+const stackItems = ["Fix deploy", "Refresh kubeconfig", "SSO token expired", "Debug SSO role"];
 
 const agentCommands =
   'detour event \'{"type":"into","title":"Debug SSO role","key":"debug-sso-role"}\' --json\n' +
+  'detour event \'{"type":"pothole","message":"VPN dropped"}\' --json\n' +
   "detour status --json";
 
 const installCommand =
-  "pipx install git+https://github.com/Midtown-Technology-Group/detour.git@v0.1.0";
+  "pipx install git+https://github.com/Midtown-Technology-Group/detour.git@v0.1.3";
+
+const logseqConfig =
+  'notes_dir = "~/OneDrive - Midtown Technology Group LLC/Knowledge/daily"\n' +
+  'section_heading = "Detours"\n' +
+  'time_format = "%H:%M"\n' +
+  'note_filename_format = "%Y_%m_%d"\n' +
+  'note_style = "logseq"';
+
+const maturityItems = [
+  "AGPL-3.0-only license",
+  "CI, release, audit, and coverage gates",
+  "Contributing, support, security, and conduct docs",
+  "GitHub issue templates",
+];
 
 const basePath = import.meta.env.BASE_URL.endsWith("/")
   ? import.meta.env.BASE_URL
@@ -82,7 +98,7 @@ const basePath = import.meta.env.BASE_URL.endsWith("/")
             </aside>
 
             <div class="hero-copy">
-              <p class="eyebrow">CLI for task chains</p>
+              <p class="eyebrow">v0.1.3 CLI for task chains</p>
               <h1 id="hero-title">Track the work before the work.</h1>
               <p class="lede">
                 <code>detour</code> records the side quests you had to handle before getting back to
@@ -136,6 +152,32 @@ const basePath = import.meta.env.BASE_URL.endsWith("/")
           </p>
         </div>
         <pre><code>{agentCommands}</code></pre>
+      </section>
+
+      <section class="section-inner split">
+        <div>
+          <p class="eyebrow">LogSeq-ready</p>
+          <h2>Land detours inside the journal you already use.</h2>
+          <p>
+            Detour can keep its plain Markdown output, or switch into a LogSeq-friendly mode
+            that appends beneath a <code>- Detours</code> block in the existing daily page.
+          </p>
+        </div>
+        <pre><code>{logseqConfig}</code></pre>
+      </section>
+
+      <section class="band maturity-band">
+        <div class="section-inner maturity-grid">
+          <div>
+            <p class="eyebrow">Project maturity</p>
+            <h2>Small tool, real guardrails.</h2>
+          </div>
+          <ul>
+            {maturityItems.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       <section class="install" id="install">
