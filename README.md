@@ -1,5 +1,7 @@
 # detour
 
+![CI](https://github.com/Midtown-Technology-Group/detour/actions/workflows/ci.yml/badge.svg)
+
 `detour` tracks the work you did to get back to the work you meant to do.
 
 It keeps a small active stack in JSON and appends timestamped events to daily
@@ -9,6 +11,12 @@ Markdown notes.
 
 ```powershell
 pipx install -e .
+```
+
+Tagged releases can be installed directly from GitHub:
+
+```powershell
+pipx install git+https://github.com/Midtown-Technology-Group/detour.git@v0.1.0
 ```
 
 Optional shell alias:
@@ -74,5 +82,7 @@ For tests or local overrides, these environment variables are supported:
 ```
 
 ## License
+
+Copyright (C) 2026 Midtown Technology Group LLC.
 
 AGPL-3.0-only. See [LICENSE](LICENSE).

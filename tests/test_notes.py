@@ -47,9 +47,33 @@ def test_inserts_section_preserving_existing_content(tmp_path: Path) -> None:
 def test_appends_nested_events_with_correct_indentation(tmp_path: Path) -> None:
     when = datetime(2026, 4, 28, 9, 12)
     append_event(tmp_path, "## Detours", when, "%H:%M", 0, "started", "Fix deploy")
-    append_event(tmp_path, "## Detours", when.replace(hour=9, minute=16), "%H:%M", 1, "detour", "Refresh kubeconfig")
-    append_event(tmp_path, "## Detours", when.replace(hour=9, minute=18), "%H:%M", 2, "detour", "Debug SSO role")
-    append_event(tmp_path, "## Detours", when.replace(hour=9, minute=24), "%H:%M", 2, "done", "Role expired")
+    append_event(
+        tmp_path,
+        "## Detours",
+        when.replace(hour=9, minute=16),
+        "%H:%M",
+        1,
+        "detour",
+        "Refresh kubeconfig",
+    )
+    append_event(
+        tmp_path,
+        "## Detours",
+        when.replace(hour=9, minute=18),
+        "%H:%M",
+        2,
+        "detour",
+        "Debug SSO role",
+    )
+    append_event(
+        tmp_path,
+        "## Detours",
+        when.replace(hour=9, minute=24),
+        "%H:%M",
+        2,
+        "done",
+        "Role expired",
+    )
 
     assert (tmp_path / "2026-04-28.md").read_text(encoding="utf-8") == (
         "## Detours\n\n"

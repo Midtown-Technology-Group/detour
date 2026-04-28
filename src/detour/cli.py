@@ -1,7 +1,9 @@
+# Copyright (C) 2026 Midtown Technology Group LLC.
+# SPDX-License-Identifier: AGPL-3.0-only
+
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -11,20 +13,30 @@ from .config import load_config
 from .notes import append_event
 from .state import DetourState, StateError
 
-
 app = typer.Typer(help="Track work detours in a small stack and daily Markdown notes.")
 console = Console()
 
 
 @app.command()
-def start(title: str, force: bool = typer.Option(False, "--force", help="Replace an active stack.")) -> None:
+def start(
+    title: str,
+    force: bool = typer.Option(False, "--force", help="Replace an active stack."),
+) -> None:
     cfg = load_config()
     state = DetourState(cfg.state_file)
     try:
         state.start(title, force=force)
     except StateError as exc:
         _fail(exc)
-    append_event(cfg.notes_dir, cfg.section_heading, datetime.now(), cfg.time_format, 0, "started", title)
+    append_event(
+        cfg.notes_dir,
+        cfg.section_heading,
+        datetime.now(),
+        cfg.time_format,
+        0,
+        "started",
+        title,
+    )
     console.print(f"Started: {title}")
 
 
@@ -36,17 +48,25 @@ def into_detour(title: str) -> None:
         depth = state.push(title)
     except StateError as exc:
         _fail(exc)
-    append_event(cfg.notes_dir, cfg.section_heading, datetime.now(), cfg.time_format, depth, "detour", title)
+    append_event(
+        cfg.notes_dir,
+        cfg.section_heading,
+        datetime.now(),
+        cfg.time_format,
+        depth,
+        "detour",
+        title,
+    )
     console.print(f"Detour: {title}")
 
 
 @app.command()
-def done(note: Optional[str] = typer.Argument(None)) -> None:
+def done(note: str | None = typer.Argument(None)) -> None:
     _pop_with_event("done", note)
 
 
 @app.command()
-def back(note: Optional[str] = typer.Argument(None)) -> None:
+def back(note: str | None = typer.Argument(None)) -> None:
     _pop_with_event("back", note)
 
 
@@ -116,7 +136,15 @@ def _pop_with_event(action: str, note: str | None) -> None:
         item = state.pop()
     except StateError as exc:
         _fail(exc)
-    append_event(cfg.notes_dir, cfg.section_heading, datetime.now(), cfg.time_format, depth, action, note)
+    append_event(
+        cfg.notes_dir,
+        cfg.section_heading,
+        datetime.now(),
+        cfg.time_format,
+        depth,
+        action,
+        note,
+    )
     suffix = f": {note}" if note else ""
     console.print(f"{action.title()}: {item.title}{suffix}")
 

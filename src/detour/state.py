@@ -1,3 +1,6 @@
+# Copyright (C) 2026 Midtown Technology Group LLC.
+# SPDX-License-Identifier: AGPL-3.0-only
+
 from __future__ import annotations
 
 import json
