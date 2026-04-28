@@ -2,26 +2,28 @@
 import "../styles/site.css";
 
 const commands = [
-  ['detour start "Fix deploy"', "Start the work you meant to do."],
-  ['detour into "Refresh kubeconfig"', "Track the work before the work."],
-  ["detour status --json", "Give agents a deterministic source of truth."],
-  ['detour done "Deploy fixed"', "Pop back toward the original task."],
+  ['detour start "Fix deploy"', "root task"],
+  ['detour into "Refresh kubeconfig"', "nested detour"],
+  ['detour into "Debug SSO role"', "one more turn"],
+  ['detour done "Role expired"', "pop back"],
 ];
 
 const features = [
   {
-    title: "Nested task stack",
-    body: "Push detours as they happen, then pop back out when the side quest is handled.",
+    title: "Stack-first state",
+    body: "The active chain lives in JSON, so humans and agents can both ask where the work actually is.",
   },
   {
-    title: "Daily Markdown log",
-    body: "Append clean, timestamped events to your daily note without making Markdown the database.",
+    title: "Daily note append",
+    body: "Every start, detour, log, done, and back event lands cleanly under your Markdown Detours section.",
   },
   {
-    title: "Agent-ready JSON",
-    body: "Structured status, idempotency keys, and event ingestion keep automation from parsing prose.",
+    title: "Block-like commands",
+    body: "Idempotent keys and structured events let automations trace messy work without parsing prose.",
   },
 ];
+
+const stackItems = ["Fix deploy", "Refresh kubeconfig", "Debug SSO role"];
 
 const agentCommands =
   'detour event \'{"type":"into","title":"Debug SSO role","key":"debug-sso-role"}\' --json\n' +
@@ -48,7 +50,7 @@ const basePath = import.meta.env.BASE_URL.endsWith("/")
   </head>
   <body>
     <main>
-      <section class="hero" aria-labelledby="hero-title">
+      <section class="hero app-shell" aria-labelledby="hero-title">
         <div class="road-grid" aria-hidden="true"></div>
         <div class="hero-inner">
           <nav class="topbar" aria-label="Project links">
@@ -61,11 +63,25 @@ const basePath = import.meta.env.BASE_URL.endsWith("/")
             </a>
           </nav>
 
-          <div class="hero-layout">
-            <div class="hero-copy">
+          <div class="workspace">
+            <aside class="side-rail" aria-label="Detour stack preview">
               <div class="sign-panel" aria-hidden="true">
                 <span>DETOUR</span>
               </div>
+              <div class="stack-card">
+                <p class="panel-label">active chain</p>
+                <ol>
+                  {stackItems.map((item, index) => (
+                    <li>
+                      <span>{index + 1}</span>
+                      <strong>{item}</strong>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </aside>
+
+            <div class="hero-copy">
               <p class="eyebrow">CLI for task chains</p>
               <h1 id="hero-title">Track the work before the work.</h1>
               <p class="lede">
@@ -88,6 +104,7 @@ const basePath = import.meta.env.BASE_URL.endsWith("/")
               <ol>
                 {commands.map(([command, note]) => (
                   <li>
+                    <span class="prompt">detour</span>
                     <code>{command}</code>
                     <small>{note}</small>
                   </li>
