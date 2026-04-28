@@ -255,6 +255,56 @@ def agents(
         console.print(f"{agent}: {summary['current']} ({summary['stack_depth']})")
 
 
+@app.command()
+def merge(
+    ctx: typer.Context,
+    json_output: bool = typer.Option(False, "--json", help="Print structured JSON output."),
+) -> None:
+    cfg = load_config()
+    state = _state(cfg, ctx)
+    lanes = {
+        agent: [item.title for item in stack]
+        for agent, stack in state.load_all().items()
+        if stack
+    }
+    if not lanes:
+        _fail(StateError("No active agent lanes to merge."))
+
+    now = datetime.now()
+    note_path = append_event(
+        cfg.notes_dir,
+        cfg.section_heading,
+        now,
+        cfg.time_format,
+        0,
+        "merge",
+        "active lanes",
+    )
+    for agent, titles in lanes.items():
+        note_path = append_event(
+            cfg.notes_dir,
+            cfg.section_heading,
+            now,
+            cfg.time_format,
+            1,
+            f"lane {agent}",
+            " -> ".join(titles),
+        )
+
+    if json_output:
+        _print_json(
+            {
+                "status": "ok",
+                "action": "merge",
+                "agent": state.agent,
+                "note": str(note_path),
+                "lanes": lanes,
+            }
+        )
+        return
+    console.print(f"Merged {len(lanes)} lane(s) into {note_path}.")
+
+
 def _pop_with_event(ctx: typer.Context, action: str, note: str | None, json_output: bool) -> None:
     cfg = load_config()
     state = _state(cfg, ctx)

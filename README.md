@@ -42,6 +42,7 @@ Other useful commands:
 detour status
 detour status --json
 detour agents
+detour merge
 detour log "Found the expired role assignment"
 detour back "Not needed after all"
 detour reset --yes
@@ -69,10 +70,14 @@ detour start "Fix project site"
 
 detour --agent "codex-ci-debug" start "Investigate failing CI"
 detour agents
+detour merge
 ```
 
 All agent stacks share the same state file, but each agent has an independent
 active chain. Existing single-stack state files load as the `default` agent.
+
+Use `detour merge` to append a road-themed snapshot of all active agent lanes to
+today's daily note without changing any stack state.
 
 ## Files
 

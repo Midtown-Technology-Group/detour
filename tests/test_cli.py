@@ -169,3 +169,32 @@ def test_cli_agent_option_overrides_environment(tmp_path: Path, monkeypatch) -> 
 
     assert result.exit_code == 0, result.output
     assert json.loads(result.output)["agent"] == "flag-agent"
+
+
+def test_cli_merge_appends_active_agent_lanes_to_daily_note(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("DETOUR_CONFIG_DIR", str(tmp_path / "config"))
+    monkeypatch.setenv("DETOUR_STATE_DIR", str(tmp_path / "state"))
+    monkeypatch.setenv("DETOUR_NOTES_DIR", str(tmp_path / "notes"))
+
+    runner.invoke(app, ["--agent", "alpha", "start", "Fix deploy"])
+    runner.invoke(app, ["--agent", "alpha", "into", "Refresh kubeconfig"])
+    runner.invoke(app, ["--agent", "beta", "start", "Write docs"])
+
+    result = runner.invoke(app, ["merge", "--json"])
+
+    assert result.exit_code == 0, result.output
+    payload = json.loads(result.output)
+    assert payload["action"] == "merge"
+    assert payload["lanes"] == {
+        "alpha": ["Fix deploy", "Refresh kubeconfig"],
+        "beta": ["Write docs"],
+    }
+
+    note = next((tmp_path / "notes").glob("*.md"))
+    text = note.read_text(encoding="utf-8")
+    assert "merge: active lanes" in text
+    assert "lane alpha: Fix deploy -> Refresh kubeconfig" in text
+    assert "lane beta: Write docs" in text
