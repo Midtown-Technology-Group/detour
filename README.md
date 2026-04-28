@@ -97,3 +97,13 @@ For tests or local overrides, these environment variables are supported:
 Copyright (C) 2026 Midtown Technology Group LLC.
 
 AGPL-3.0-only. See [LICENSE](LICENSE).
+
+## Project Site
+
+The Astro project site lives in `site/`.
+
+```powershell
+npm install
+npm run dev
+npm run build
+```

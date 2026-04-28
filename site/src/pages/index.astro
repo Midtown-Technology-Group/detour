@@ -1,0 +1,130 @@
+---
+const commands = [
+  ['detour start "Fix deploy"', "Start the work you meant to do."],
+  ['detour into "Refresh kubeconfig"', "Track the work before the work."],
+  ["detour status --json", "Give agents a deterministic source of truth."],
+  ['detour done "Deploy fixed"', "Pop back toward the original task."],
+];
+
+const features = [
+  {
+    title: "Nested task stack",
+    body: "Push detours as they happen, then pop back out when the side quest is handled.",
+  },
+  {
+    title: "Daily Markdown log",
+    body: "Append clean, timestamped events to your daily note without making Markdown the database.",
+  },
+  {
+    title: "Agent-ready JSON",
+    body: "Structured status, idempotency keys, and event ingestion keep automation from parsing prose.",
+  },
+];
+
+const agentCommands =
+  'detour event \'{"type":"into","title":"Debug SSO role","key":"debug-sso-role"}\' --json\n' +
+  "detour status --json";
+
+const installCommand =
+  "pipx install git+https://github.com/Midtown-Technology-Group/detour.git@v0.1.0";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="detour tracks the work you did to get back to the work you meant to do."
+    />
+    <title>detour - track the work before the work</title>
+    <link rel="stylesheet" href="/styles/site.css" />
+  </head>
+  <body>
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="road-grid" aria-hidden="true"></div>
+        <div class="hero-inner">
+          <nav class="topbar" aria-label="Project links">
+            <a class="brand" href="/" aria-label="detour home">
+              <span class="brand-mark">D</span>
+              <span>detour</span>
+            </a>
+            <a class="repo-link" href="https://github.com/Midtown-Technology-Group/detour">
+              GitHub
+            </a>
+          </nav>
+
+          <div class="hero-layout">
+            <div class="hero-copy">
+              <div class="sign-panel" aria-hidden="true">
+                <span>DETOUR</span>
+              </div>
+              <p class="eyebrow">CLI for task chains</p>
+              <h1 id="hero-title">Track the work before the work.</h1>
+              <p class="lede">
+                <code>detour</code> records the side quests you had to handle before getting back to
+                the thing you actually meant to do.
+              </p>
+              <div class="hero-actions">
+                <a class="primary-action" href="#install">Install</a>
+                <a class="secondary-action" href="#agent-mode">Agent mode</a>
+              </div>
+            </div>
+
+            <div class="terminal" aria-label="Example detour session">
+              <div class="terminal-top">
+                <span></span>
+                <span></span>
+                <span></span>
+                <strong>detour trace</strong>
+              </div>
+              <ol>
+                {commands.map(([command, note]) => (
+                  <li>
+                    <code>{command}</code>
+                    <small>{note}</small>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="section-inner feature-grid">
+          {features.map((feature) => (
+            <article class="feature">
+              <h2>{feature.title}</h2>
+              <p>{feature.body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="section-inner split" id="agent-mode">
+        <div>
+          <p class="eyebrow">Agent-friendly</p>
+          <h2>Deterministic traces for messy work.</h2>
+          <p>
+            Agents can ask for the active chain, push idempotent detours, and write
+            structured events without scraping terminal copy.
+          </p>
+        </div>
+        <pre><code>{agentCommands}</code></pre>
+      </section>
+
+      <section class="install" id="install">
+        <div class="section-inner install-inner">
+          <div>
+            <p class="eyebrow">Install</p>
+            <h2>Drop it into your dev-toy belt.</h2>
+          </div>
+          <pre><code>{installCommand}</code></pre>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

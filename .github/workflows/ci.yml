@@ -48,3 +48,20 @@ jobs:
         run: python -m twine check dist/*
       - name: Audit dependencies
         run: python -m pip_audit .
+
+  site:
+    name: Site build and audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "npm"
+      - name: Install
+        run: npm ci
+      - name: Build site
+        run: npm run build
+      - name: Audit site dependencies
+        run: npm audit --audit-level=moderate
