@@ -64,6 +64,8 @@ def _start(
             0,
             "started",
             title,
+            cfg.note_filename_format,
+            cfg.note_style,
         )
     _print_result(
         state.agent,
@@ -101,6 +103,8 @@ def _into(ctx: typer.Context, title: str, key: str | None, json_output: bool) ->
             result.depth,
             "detour",
             title,
+            cfg.note_filename_format,
+            cfg.note_style,
         )
     _print_result(
         state.agent,
@@ -228,6 +232,8 @@ def show_config() -> None:
     console.print(f"notes_dir: {cfg.notes_dir}")
     console.print(f"section_heading: {cfg.section_heading}")
     console.print(f"time_format: {cfg.time_format}")
+    console.print(f"note_filename_format: {cfg.note_filename_format}")
+    console.print(f"note_style: {cfg.note_style}")
     console.print(f"agent_name: {cfg.agent_name}")
 
 
@@ -279,6 +285,8 @@ def merge(
         0,
         "merge",
         "active lanes",
+        cfg.note_filename_format,
+        cfg.note_style,
     )
     for agent, titles in lanes.items():
         note_path = append_event(
@@ -289,6 +297,8 @@ def merge(
             1,
             f"lane {agent}",
             " -> ".join(titles),
+            cfg.note_filename_format,
+            cfg.note_style,
         )
 
     if json_output:
@@ -324,6 +334,8 @@ def _pop_with_event(ctx: typer.Context, action: str, note: str | None, json_outp
         depth,
         action,
         note,
+        cfg.note_filename_format,
+        cfg.note_style,
     )
     suffix = f": {note}" if note else ""
     _print_result(
@@ -350,6 +362,8 @@ def _log(ctx: typer.Context, message: str, json_output: bool) -> None:
         len(stack) - 1,
         "note",
         message,
+        cfg.note_filename_format,
+        cfg.note_style,
     )
     _print_result(state.agent, "log", stack, True, json_output, "Logged.")
 

@@ -82,3 +82,69 @@ def test_appends_nested_events_with_correct_indentation(tmp_path: Path) -> None:
         "    - 09:18 detour: Debug SSO role\n"
         "    - 09:24 done: Role expired\n"
     )
+
+
+def test_logseq_style_uses_configured_filename_and_bullet_section(tmp_path: Path) -> None:
+    note = tmp_path / "2026_04_28.md"
+    note.write_text("- Existing block\n", encoding="utf-8")
+
+    append_event(
+        notes_dir=tmp_path,
+        section_heading="Detours",
+        when=datetime(2026, 4, 28, 9, 12),
+        time_format="%H:%M",
+        depth=0,
+        action="started",
+        message="Fix deploy",
+        note_filename_format="%Y_%m_%d",
+        note_style="logseq",
+    )
+    append_event(
+        notes_dir=tmp_path,
+        section_heading="Detours",
+        when=datetime(2026, 4, 28, 9, 16),
+        time_format="%H:%M",
+        depth=1,
+        action="detour",
+        message="Refresh kubeconfig",
+        note_filename_format="%Y_%m_%d",
+        note_style="logseq",
+    )
+
+    assert note.read_text(encoding="utf-8") == (
+        "- Existing block\n"
+        "- Detours\n"
+        "\t- 09:12 started: Fix deploy\n"
+        "\t\t- 09:16 detour: Refresh kubeconfig\n"
+    )
+
+
+def test_logseq_style_inserts_inside_existing_detours_block(tmp_path: Path) -> None:
+    note = tmp_path / "2026_04_28.md"
+    note.write_text(
+        "- Existing block\n"
+        "- Detours\n"
+        "\t- 09:12 started: Fix deploy\n"
+        "- Later human block\n",
+        encoding="utf-8",
+    )
+
+    append_event(
+        notes_dir=tmp_path,
+        section_heading="- Detours",
+        when=datetime(2026, 4, 28, 9, 24),
+        time_format="%H:%M",
+        depth=1,
+        action="done",
+        message="Role expired",
+        note_filename_format="%Y_%m_%d",
+        note_style="logseq",
+    )
+
+    assert note.read_text(encoding="utf-8") == (
+        "- Existing block\n"
+        "- Detours\n"
+        "\t- 09:12 started: Fix deploy\n"
+        "\t\t- 09:24 done: Role expired\n"
+        "- Later human block\n"
+    )

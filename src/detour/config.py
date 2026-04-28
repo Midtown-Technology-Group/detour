@@ -20,6 +20,8 @@ class DetourConfig:
     notes_dir: Path
     section_heading: str
     time_format: str
+    note_filename_format: str
+    note_style: str
     agent_name: str
 
 
@@ -38,6 +40,8 @@ def load_config() -> DetourConfig:
     )
     section_heading = data.get("section_heading", "## Detours")
     time_format = data.get("time_format", "%H:%M")
+    note_filename_format = data.get("note_filename_format", "%Y-%m-%d")
+    note_style = data.get("note_style", "markdown")
     agent_name = os.environ.get("DETOUR_AGENT") or data.get("agent_name", "default")
 
     return DetourConfig(
@@ -48,6 +52,8 @@ def load_config() -> DetourConfig:
         notes_dir=notes_dir,
         section_heading=section_heading,
         time_format=time_format,
+        note_filename_format=note_filename_format,
+        note_style=note_style,
         agent_name=agent_name,
     )
 

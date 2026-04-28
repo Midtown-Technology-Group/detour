@@ -93,6 +93,19 @@ Config example:
 notes_dir = "~/notes/daily"
 section_heading = "## Detours"
 time_format = "%H:%M"
+note_filename_format = "%Y-%m-%d"
+note_style = "markdown"
+```
+
+LogSeq-backed journals can use the existing journal directory and underscore
+filenames:
+
+```toml
+notes_dir = "~/OneDrive - Midtown Technology Group LLC/Knowledge/daily"
+section_heading = "Detours"
+time_format = "%H:%M"
+note_filename_format = "%Y_%m_%d"
+note_style = "logseq"
 ```
 
 For tests or local overrides, these environment variables are supported:
