@@ -16,7 +16,7 @@ pipx install -e .
 Tagged releases can be installed directly from GitHub:
 
 ```powershell
-pipx install git+https://github.com/Midtown-Technology-Group/detour.git@v0.1.0
+pipx install git+https://github.com/Midtown-Technology-Group/detour.git@v0.1.3
 ```
 
 Optional shell alias:
@@ -164,3 +164,10 @@ distribution files attached.
 `detour` uses pytest with branch-aware coverage, ruff, mypy, package build
 checks, and dependency audits in CI. For broader FOSS hygiene, use the OpenSSF
 Best Practices Badge criteria as the project checklist.
+
+Project process docs:
+
+- [Contributing](CONTRIBUTING.md)
+- [Security](SECURITY.md)
+- [Support](SUPPORT.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)

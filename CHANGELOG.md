@@ -5,6 +5,14 @@ All notable changes to `detour` will be documented in this file.
 The format is based on Keep a Changelog, and this project uses semantic
 versioning once releases are tagged.
 
+## [0.1.3] - 2026-04-28
+
+### Added
+
+- Contributing, security, support, and code-of-conduct docs.
+- GitHub issue templates for bug reports and feature requests.
+- Project URLs, author metadata, and package keywords/classifiers.
+
 ## [0.1.2] - 2026-04-28
 
 ### Added
