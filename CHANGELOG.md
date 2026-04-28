@@ -11,6 +11,10 @@ versioning once releases are tagged.
 
 - Initial Typer CLI with `start`, `into`, `done`, `back`, `status`, `log`,
   `reset`, and `config` commands.
+- Agent-friendly JSON output for core commands.
+- Structured `event` command for machine-authored transitions.
+- Optional idempotency keys for `start` and `into`.
+- `started_at` metadata in stack state.
 - JSON stack state under the platform state directory.
 - Daily Markdown note appends with automatic `## Detours` section creation.
 - TOML config support and test-friendly environment overrides.

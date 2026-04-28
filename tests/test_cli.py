@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -64,3 +65,67 @@ def test_reset_requires_yes(tmp_path: Path, monkeypatch) -> None:
 
     assert result.exit_code != 0
     assert "Pass --yes" in result.output
+
+
+def test_cli_json_status_and_idempotency_key(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("DETOUR_CONFIG_DIR", str(tmp_path / "config"))
+    monkeypatch.setenv("DETOUR_STATE_DIR", str(tmp_path / "state"))
+    monkeypatch.setenv("DETOUR_NOTES_DIR", str(tmp_path / "notes"))
+
+    start = runner.invoke(app, ["start", "Fix deploy", "--json"])
+    first = runner.invoke(
+        app,
+        ["into", "Refresh kubeconfig", "--key", "kubeconfig-refresh", "--json"],
+    )
+    second = runner.invoke(
+        app,
+        ["into", "Refresh kubeconfig", "--key", "kubeconfig-refresh", "--json"],
+    )
+    status = runner.invoke(app, ["status", "--json"])
+
+    assert start.exit_code == 0, start.output
+    assert first.exit_code == 0, first.output
+    assert second.exit_code == 0, second.output
+    assert status.exit_code == 0, status.output
+    assert json.loads(start.output)["stack_depth"] == 1
+    assert json.loads(first.output)["created"] is True
+    assert json.loads(second.output)["created"] is False
+    assert json.loads(status.output)["stack"] == [
+        {
+            "title": "Fix deploy",
+            "started_at": json.loads(status.output)["stack"][0]["started_at"],
+            "key": None,
+        },
+        {
+            "title": "Refresh kubeconfig",
+            "started_at": json.loads(status.output)["stack"][1]["started_at"],
+            "key": "kubeconfig-refresh",
+        },
+    ]
+
+
+def test_cli_event_command_accepts_structured_json(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("DETOUR_CONFIG_DIR", str(tmp_path / "config"))
+    monkeypatch.setenv("DETOUR_STATE_DIR", str(tmp_path / "state"))
+    monkeypatch.setenv("DETOUR_NOTES_DIR", str(tmp_path / "notes"))
+
+    result = runner.invoke(
+        app,
+        [
+            "event",
+            '{"type":"start","title":"Fix deploy","key":"deploy"}',
+            "--json",
+        ],
+    )
+    into = runner.invoke(
+        app,
+        [
+            "event",
+            '{"type":"into","title":"Refresh kubeconfig","key":"kubeconfig-refresh"}',
+            "--json",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert into.exit_code == 0, into.output
+    assert json.loads(into.output)["current"] == "Refresh kubeconfig"

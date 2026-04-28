@@ -40,11 +40,22 @@ Other useful commands:
 
 ```powershell
 detour status
+detour status --json
 detour log "Found the expired role assignment"
 detour back "Not needed after all"
 detour reset --yes
 detour config
 ```
+
+Agent-friendly structured output is available with `--json`:
+
+```powershell
+detour into "Refresh kubeconfig" --key kubeconfig-refresh --json
+detour event '{"type":"into","title":"Debug SSO role","key":"debug-sso-role"}' --json
+```
+
+`--key` is an idempotency guard. If the current stack item already has the same
+key, `detour` returns success without pushing a duplicate item.
 
 ## Files
 
