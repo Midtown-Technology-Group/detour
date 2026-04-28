@@ -20,7 +20,7 @@ python -m pip_audit .
 Update `pyproject.toml` and `CHANGELOG.md`, commit the change, then tag:
 
 ```powershell
-git tag -a v0.1.3 -m "detour v0.1.3"
+git tag -a vX.Y.Z -m "detour vX.Y.Z"
 git push origin main --tags
 ```
 
@@ -29,6 +29,6 @@ git push origin main --tags
 After the tag is pushed:
 
 ```powershell
-pipx install git+https://github.com/Midtown-Technology-Group/detour.git@v0.1.3
+pipx install git+https://github.com/Midtown-Technology-Group/detour.git@vX.Y.Z
 detour --help
 ```

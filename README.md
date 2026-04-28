@@ -157,8 +157,8 @@ Releases are tag-driven. Update `project.version` in `pyproject.toml`, commit th
 change, then push a matching `vX.Y.Z` tag:
 
 ```powershell
-git tag v0.1.0
-git push origin v0.1.0
+git tag vX.Y.Z
+git push origin vX.Y.Z
 ```
 
 The release workflow verifies the tag matches the package version, runs checks,
