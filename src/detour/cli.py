@@ -140,7 +140,16 @@ def log(
     message: str,
     json_output: bool = typer.Option(False, "--json", help="Print structured JSON output."),
 ) -> None:
-    _log(ctx, message, json_output)
+    _append_note(ctx, "note", message, "log", "Logged.", json_output)
+
+
+@app.command()
+def pothole(
+    ctx: typer.Context,
+    message: str,
+    json_output: bool = typer.Option(False, "--json", help="Print structured JSON output."),
+) -> None:
+    _append_note(ctx, "pothole", message, "pothole", "Pothole marked.", json_output)
 
 
 @app.command()
@@ -217,9 +226,14 @@ def event(
         message = data.get("message")
         if not isinstance(message, str):
             _fail(StateError("Event message must be a string."))
-        _log(ctx, message, json_output)
+        _append_note(ctx, "note", message, "log", "Logged.", json_output)
+    elif event_type == "pothole":
+        message = data.get("message")
+        if not isinstance(message, str):
+            _fail(StateError("Event message must be a string."))
+        _append_note(ctx, "pothole", message, "pothole", "Pothole marked.", json_output)
     else:
-        _fail(StateError("Event type must be one of start, into, done, back, or log."))
+        _fail(StateError("Event type must be one of start, into, done, back, log, or pothole."))
 
 
 @app.command("config")
@@ -348,7 +362,14 @@ def _pop_with_event(ctx: typer.Context, action: str, note: str | None, json_outp
     )
 
 
-def _log(ctx: typer.Context, message: str, json_output: bool) -> None:
+def _append_note(
+    ctx: typer.Context,
+    note_action: str,
+    message: str,
+    result_action: str,
+    human_message: str,
+    json_output: bool,
+) -> None:
     cfg = load_config()
     state = _state(cfg, ctx)
     stack = state.load()
@@ -360,12 +381,12 @@ def _log(ctx: typer.Context, message: str, json_output: bool) -> None:
         datetime.now(),
         cfg.time_format,
         len(stack) - 1,
-        "note",
+        note_action,
         message,
         cfg.note_filename_format,
         cfg.note_style,
     )
-    _print_result(state.agent, "log", stack, True, json_output, "Logged.")
+    _print_result(state.agent, result_action, stack, True, json_output, human_message)
 
 
 def _state(cfg: DetourConfig, ctx: typer.Context) -> DetourState:

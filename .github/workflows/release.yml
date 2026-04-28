@@ -50,7 +50,7 @@ jobs:
       - name: Type check
         run: python -m mypy src/detour
       - name: Test
-        run: python -m pytest
+        run: python -m pytest --cov=detour --cov-report=term-missing
       - name: Build
         run: python -m build
       - name: Check distributions

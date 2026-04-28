@@ -25,6 +25,9 @@ def test_cli_smoke_workflow_uses_environment_overrides(tmp_path: Path, monkeypat
     result = runner.invoke(app, ["log", "kubectl context expired"])
     assert result.exit_code == 0, result.output
 
+    result = runner.invoke(app, ["pothole", "SSO token expired"])
+    assert result.exit_code == 0, result.output
+
     result = runner.invoke(app, ["status"])
     assert result.exit_code == 0, result.output
     assert "Fix deploy" in result.output
@@ -38,6 +41,7 @@ def test_cli_smoke_workflow_uses_environment_overrides(tmp_path: Path, monkeypat
     assert "started: Fix deploy" in text
     assert "detour: Refresh kubeconfig" in text
     assert "note: kubectl context expired" in text
+    assert "pothole: SSO token expired" in text
     assert "done: Refreshed" in text
 
 
@@ -129,6 +133,29 @@ def test_cli_event_command_accepts_structured_json(tmp_path: Path, monkeypatch) 
     assert result.exit_code == 0, result.output
     assert into.exit_code == 0, into.output
     assert json.loads(into.output)["current"] == "Refresh kubeconfig"
+
+
+def test_cli_event_command_accepts_pothole(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("DETOUR_CONFIG_DIR", str(tmp_path / "config"))
+    monkeypatch.setenv("DETOUR_STATE_DIR", str(tmp_path / "state"))
+    monkeypatch.setenv("DETOUR_NOTES_DIR", str(tmp_path / "notes"))
+
+    runner.invoke(app, ["start", "Fix deploy"])
+    result = runner.invoke(
+        app,
+        [
+            "event",
+            '{"type":"pothole","message":"VPN dropped"}',
+            "--json",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    payload = json.loads(result.output)
+    assert payload["action"] == "pothole"
+
+    note = next((tmp_path / "notes").glob("*.md"))
+    assert "pothole: VPN dropped" in note.read_text(encoding="utf-8")
 
 
 def test_cli_agent_environment_scopes_active_stack(tmp_path: Path, monkeypatch) -> None:

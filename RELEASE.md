@@ -7,7 +7,7 @@
 Run from the repository root:
 
 ```powershell
-python -m pytest
+python -m pytest --cov=detour --cov-report=term-missing
 python -m ruff check .
 python -m mypy src/detour
 python -m build

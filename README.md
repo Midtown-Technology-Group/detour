@@ -44,6 +44,7 @@ detour status --json
 detour agents
 detour merge
 detour log "Found the expired role assignment"
+detour pothole "SSO token expired mid-deploy"
 detour back "Not needed after all"
 detour reset --yes
 detour config
@@ -157,3 +158,9 @@ git push origin v0.1.0
 The release workflow verifies the tag matches the package version, runs checks,
 builds the source distribution and wheel, and publishes a GitHub Release with the
 distribution files attached.
+
+## Project Maturity
+
+`detour` uses pytest with branch-aware coverage, ruff, mypy, package build
+checks, and dependency audits in CI. For broader FOSS hygiene, use the OpenSSF
+Best Practices Badge criteria as the project checklist.

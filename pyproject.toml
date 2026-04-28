@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "detour"
-version = "0.1.1"
+version = "0.1.2"
 description = "Track the work you did to get back to the work you meant to do."
 readme = "README.md"
 license = "AGPL-3.0-only"
@@ -28,6 +28,7 @@ dev = [
   "mypy>=1.8",
   "pip-audit>=2.7",
   "pytest>=8.0",
+  "pytest-cov>=7.0",
   "ruff>=0.4",
   "twine>=5.0",
 ]
@@ -41,6 +42,14 @@ packages = ["src/detour"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["detour"]
+
+[tool.coverage.report]
+fail_under = 75
+show_missing = true
 
 [tool.ruff]
 line-length = 100
