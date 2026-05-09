@@ -177,3 +177,7 @@ Project process docs:
 - [Security](SECURITY.md)
 - [Support](SUPPORT.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
+
+## Windows MSI
+
+Tagged releases build a per-machine Windows MSI that installs `detour.exe` under `Program Files` and adds that install directory to the system PATH. Installing or uninstalling the MSI requires an elevated prompt.
