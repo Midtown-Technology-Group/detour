@@ -1,0 +1,25 @@
+name: tickgit TODO guard
+
+on:
+  pull_request:
+  schedule:
+    - cron: "17 13 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  todo-guard:
+    name: Detect new TODO comments
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: MTG-Thomas/tickgit@v0.0.17
+        with:
+          baseline-file: .github/tickgit-baseline.csv
+          fail-on-new: "true"
+          match-phrases: TODO,FIXME,HACK
+          ignore-paths: node_modules,site,output
