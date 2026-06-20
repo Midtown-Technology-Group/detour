@@ -9,6 +9,6 @@
     "preview": "astro preview --host 127.0.0.1"
   },
   "devDependencies": {
-    "astro": "^6.1.10"
+    "astro": "^6.4.6"
   }
 }
