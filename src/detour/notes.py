@@ -46,6 +46,9 @@ def append_event(
 def _ensure_section(text: str, section_heading: str) -> str:
     if not text:
         return f"{section_heading}\n\n"
+    # Most journals start with the section. Avoid splitting the whole note.
+    if text.startswith(section_heading + "\n") and section_heading.isprintable():
+        return text
     if section_heading in text.splitlines():
         return text
     return text.rstrip() + f"\n\n{section_heading}\n\n"
