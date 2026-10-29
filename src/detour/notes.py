@@ -93,13 +93,15 @@ def _append_logseq_event(
         if candidate.strip() and not candidate.startswith(("\t", " ")):
             break
         insert_at += 1
+    if insert_at == len(lines) and not lines[-1].endswith(("\n", "\r")):
+        lines[-1] += "\n"
     lines.insert(insert_at, line)
     return "".join(lines)
 
 
 def _find_logseq_section(lines: list[str], section_line: str) -> int | None:
     for index, line in enumerate(lines):
-        if line.strip() == section_line:
+        if line.rstrip() == section_line:
             return index
     return None
 
