@@ -85,13 +85,15 @@ def test_cli_start_preserves_logseq_block_boundaries(
     config_dir.mkdir()
     notes_dir.mkdir()
     (config_dir / "config.toml").write_text(
-        'note_style = "logseq"\nsection_heading = "Detours"\n', encoding="utf-8"
+        'note_style = "logseq"\nsection_heading = "Detours"\n'
+        'note_filename_format = "test-note"\n',
+        encoding="utf-8",
     )
     monkeypatch.setenv("DETOUR_CONFIG_DIR", str(config_dir))
     monkeypatch.setenv("DETOUR_STATE_DIR", str(tmp_path / "state"))
     monkeypatch.setenv("DETOUR_NOTES_DIR", str(notes_dir))
     monkeypatch.delenv("DETOUR_AGENT", raising=False)
-    note = notes_dir / f"{datetime.now():%Y-%m-%d}.md"
+    note = notes_dir / "test-note.md"
     note.write_text(text, encoding="utf-8")
 
     result = CliRunner().invoke(app, ["start", "Fix deploy", "--json"])
